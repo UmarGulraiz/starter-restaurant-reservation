@@ -13,12 +13,12 @@ import "./Layout.css";
  */
 function Layout() {
   return (
-    <div className="">
+    <div style={{width:"fixed"}} >
       <div className="row h-100">
-        <div className="col-md-2 side-bar">
+        <div className="col-md-2">
           <Menu />
         </div>
-        <div className="col-md-10" style={{ position: "absolute", left: "15%" }}>
+        <div className="col-sm-8 col-md-9 col-xl-10  responsive">
           <Routes />
         </div>
       </div>

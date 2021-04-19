@@ -28,7 +28,6 @@ class TableList extends Component {
   }
 
   handleFinishReq = (data) => {
-    console.log(data);
     Swal.fire({
       title: '"Is this table ready to seat new guests? This cannot be undone.',
       confirmButtonText: `OK`,
@@ -103,7 +102,7 @@ class TableList extends Component {
         <button
           type="submit"
           className="btn btn-secondary float-right"
-          onClick={() => this.handleRoutes}
+          onClick={() => this.handleRoutes()}
         >
           Cancel
         </button>
