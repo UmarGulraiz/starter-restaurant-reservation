@@ -18,7 +18,7 @@ function Layout() {
         <div className="col-md-2">
           <Menu />
         </div>
-        <div className="col-sm-8 col-md-9 col-xl-10  responsive">
+        <div className="col-sm-8 col-md-9 col-xl-10  content">
           <Routes />
         </div>
       </div>
