@@ -1,6 +1,9 @@
-# Starter Restaurant Reservation
+# Capstone: Restaurant Reservation System Backend
+
 Starter Restaurant Reservation is an online system used to maintain record for customer reservations. A reservation will be create for customers which include details of Number of person, Phone Number, Reservation Time, The reservation will not be create before 10:00 am and after 9:30 pm and for the past days. This system will also keep track which reservation is booked, seated and finished. The manager can also search reservation by entering the Phone Number or date.
 
+## Live Application Link
+https://starter-restaurant-reservation-backend.vercel.app/
 
 The table below listing the existing routes in the `./back-end` folder:
 
