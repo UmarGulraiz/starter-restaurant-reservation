@@ -89,9 +89,9 @@ async function updateStatus(req, res) {
 }
 
 module.exports = {
-  list,
+  list: asyncErrorBoundary(list),
   create: asyncErrorBoundary(create),
-  show,
+  show: asyncErrorBoundary(show),
   update: asyncErrorBoundary(update),
-  updateStatus
+  updateStatus: asyncErrorBoundary(updateStatus)
 };
