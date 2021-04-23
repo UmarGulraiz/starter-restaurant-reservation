@@ -78,7 +78,7 @@ async function deleteTable(req, res) {
 }
 
 module.exports = {
-  list,
+  list: asyncErrorBoundary(list),
   create: asyncErrorBoundary(create),
   update: asyncErrorBoundary(update),
   deleteTable: asyncErrorBoundary(deleteTable),
