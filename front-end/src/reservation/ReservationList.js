@@ -11,7 +11,7 @@ class ReservationList extends Component {
     this.Reservation_status =
       process.env.REACT_APP_API_BASE_URL + '/reservations'
     this.state = {
-      DataForReservation: this.props.responseFromSearch?this.props.responseFromSearch.data.data:[],
+      DataForReservation: this.props.responseFromSearch ? this.props.responseFromSearch.data.data : [],
       errorFromAPI: ''
     }
   }
@@ -27,20 +27,24 @@ class ReservationList extends Component {
 
   handleCancelButton = (event, data) => {
     event.preventDefault()
+    const abortController = new AbortController()
     Swal.fire({
-      title: '"Do you want to cancel this reservation? This cannot be undone.',
+      title: '"Do you want to cancel this reservation?',
       confirmButtonText: `OK`,
       denyButtonText: `Cancel`,
+      showCancelButton: true,
     }).then((result) => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
+      
+
         let model = {
           status: 'cancelled',
         }
         let data1 = { data: {} };
         data1.data = model
         axios
-          .put(this.Reservation_status + "/" + data.reservation_id + '/status', data1)
+          .put(this.Reservation_status + "/" + data.reservation_id + '/status', data1,abortController.signal)
           .then((res) => {
             Swal.fire('Updated!', '', 'success').then(() => {
               this.componentDidMount()
@@ -49,25 +53,27 @@ class ReservationList extends Component {
           .catch((err) => {
             this.setState({ errorFromAPI: err })
           })
+          return () => abortController.abort()
       } else if (result.isDenied) {
         return
       }
     })
   }
 
-    componentDidMount() {
-      axios
-        .get(this.Reservation_status)
-        .then((res) => {
-          let resFromFun = formatReservationDate(res.data.data)
-          this.setState({
-            DataForReservation: resFromFun,
-          })
+  componentDidMount() {
+    const abortController = new AbortController()
+    axios
+      .get(this.Reservation_status, abortController.signal)
+      .then((res) => {
+        let resFromFun = formatReservationDate(res.data.data)
+        this.setState({
+          DataForReservation: resFromFun,
         })
-        .catch((err) => {
-          this.setState({ errorFromAPI: err })
-        })
-    
+      })
+      .catch((err) => {
+        this.setState({ errorFromAPI: err })
+      })
+    return () => abortController.abort()
 
   }
   render() {
@@ -106,9 +112,7 @@ class ReservationList extends Component {
                   {table.status === 'booked' ? (
                     <td>
                       <a
-                        href={
-                          '/reservations/:' + table.reservation_id + '/edit'
-                        }
+                        href={'/reservations/' + table.reservation_id + '/edit'}
                         onClick={(event) => this.handleEditClick(event, table)}
                       >
                         Edit

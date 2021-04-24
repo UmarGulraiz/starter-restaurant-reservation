@@ -15,7 +15,7 @@ import ReservationStatus from '../reservation/ReservationStatus'
  */
 function Dashboard({ date }, props) {
   let history = useHistory()
-  const [reservations, setReservations] = useState([])
+  const [setReservations] = useState([])
   const [reservationsError, setReservationsError] = useState(null)
 
   useEffect(loadDashboard, [date])
@@ -30,7 +30,6 @@ function Dashboard({ date }, props) {
   }
 
   const handleRoutes = () => {
-    // history.push(`/reservations/new`, { from: '/dashboard' })
     history.goBack()
   }
 
@@ -54,7 +53,7 @@ function Dashboard({ date }, props) {
           className="btn btn-secondary float-right"
           onClick={handleRoutes}
         >
-          Cancel
+          cancel
         </button>
       </main>
 

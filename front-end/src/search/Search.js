@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router'
 import axios from 'axios'
+import ErrorAlert from '../layout/ErrorAlert'
+
 import ReservationList from '../reservation/ReservationList'
 class SearchByPhone extends Component {
   constructor(props) {
@@ -15,6 +17,7 @@ class SearchByPhone extends Component {
     this.state = {
       searchByPhoneModel: this.searchByPhoneModel,
       response: '',
+      errorFromAPI: ""
     }
   }
 
@@ -30,22 +33,33 @@ class SearchByPhone extends Component {
 
   handleSubmit = () => {
     const { searchByPhoneModel } = this.state
+    const abortController = new AbortController()
 
     axios
-      .get(this.FindPhoneNumber + searchByPhoneModel.mobile_number)
+      .get(this.FindPhoneNumber + searchByPhoneModel.mobile_number,abortController.signal)
       .then((res) => {
-        this.setState({
-          response: res
-        })
+        if (res.data.lenght > 0) {
+          this.setState({
+            response: res
+          })
+        } else {
+
+          const error = {};
+          error.message = "No reservations found message"
+          this.setState({ errorFromAPI: error });
+          return;
+        }
+
       })
       .catch((error) => {
         this.setState({
           response: error,
         })
       })
+      return () => abortController.abort()
   }
   render() {
-    const { searchByPhoneModel, response } = this.state
+    const { searchByPhoneModel, response, errorFromAPI } = this.state
     return (
       <>
         <h4 className="text-center">Search by Phone</h4>
@@ -61,6 +75,7 @@ class SearchByPhone extends Component {
               value={searchByPhoneModel.mobile_number}
               onChange={this.handleChange}
               required
+              placeholder="Enter a customer's phone number"
             />
           </div>
         </div>
@@ -71,7 +86,8 @@ class SearchByPhone extends Component {
         >
           Find
         </button>
-        {response && response.data ? <ReservationList responseFromSearch={response}/> : null}
+        {response && response.data ? <ReservationList responseFromSearch={response} /> : null}
+        {errorFromAPI ? <ErrorAlert error={errorFromAPI} /> : null}
       </>
     )
   }

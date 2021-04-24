@@ -14,9 +14,9 @@ export default class TableComp extends Component {
   }
 
   componentDidMount() {
-
+    const abortController = new AbortController()
     axios
-      .get(this.Reservation_status + "?date=" + this.props.date)
+      .get(this.Reservation_status + "?date=" + this.props.date,abortController.signal)
       .then((res) => {
         let resFromFun = formatReservationDate(res.data.data)
         this.setState({
@@ -27,6 +27,7 @@ export default class TableComp extends Component {
       .catch((err) => {
         this.setState({ errorFromAPI: err })
       })
+      return () => abortController.abort()
 
 
   }

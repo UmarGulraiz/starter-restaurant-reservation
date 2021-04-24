@@ -15,7 +15,7 @@ body {
   overflow: auto;
 }
 
-.sidebar a {
+.sidebar a,span {
   display: block;
   color: #ffeb00;
   padding: 16px;

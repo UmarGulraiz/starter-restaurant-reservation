@@ -31,26 +31,44 @@ class Booktable extends Component {
   }
 
   bookTable(event) {
-    event.preventDefault()
+    event.preventDefault();
+    
     const { tableBookingModel } = this.state
-    let data = {data :{}};
-    tableBookingModel.capacity = parseInt(tableBookingModel.capacity, 10)              // convert people from str to number 
-    data.data =tableBookingModel
-    axios
-      .post(this.Table_Booking, data)
-      .then((res) => {
-        this.setState(
-          {
-            tableBookingModel: res.data,
-          },
-          () => {
-            this.props.history.push(`/dashboard`, { from: '/tables/new' })
-          },
-        )
-      })
-      .catch((error) => {
-        this.setState({ errorFromAPI: error })
-      })
+
+
+    if (tableBookingModel.table_name.length < 2) {
+      const error = {};
+      error.message = "Table least 2 characters"
+      this.setState({ errorFromAPI: error });
+      return;
+    } else if (tableBookingModel.capacity === "0") {
+      const error = {};
+      error.message = "capacity atleast 1 characters"
+      this.setState({ errorFromAPI: error });
+      return;
+    } else {
+      let data = { data: {} };
+      tableBookingModel.capacity = parseInt(tableBookingModel.capacity, 10)              // convert people from str to number 
+      data.data = tableBookingModel
+      const abortController = new AbortController()
+      axios
+        .post(this.Table_Booking, data ,abortController.signal)
+        .then((res) => {
+          this.setState(
+            {
+              tableBookingModel: res.data,
+            },
+            () => {
+              this.props.history.push(`/dashboard`, { from: '/tables/new' })
+            },
+          )
+        })
+        .catch((error) => {
+          this.setState({ errorFromAPI: error })
+        })
+        return () => abortController.abort()
+    }
+
   }
 
   handleCancel = () => {
@@ -81,7 +99,7 @@ class Booktable extends Component {
             <div className="form-group col-md-6">
               <label htmlFor="capacity">Capacity</label>
               <input
-                type="text"
+                type="number"
                 className="form-control"
                 id="capacity"
                 name="capacity"

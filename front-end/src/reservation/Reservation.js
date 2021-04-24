@@ -70,6 +70,7 @@ class Reservation extends Component {
   }
 
   futureDateCheck = (enteredDate) => {
+
     var selectedDate = new Date(enteredDate)
     var now = new Date();
     now = new Date(now)
@@ -119,20 +120,41 @@ class Reservation extends Component {
   saveReservation(event) {
     event.preventDefault()
 
+    const validationErr = {};
 
     let Validation_Res = this.validateTime();
+    if (this.state.futureDateVal === false) {
+      validationErr.message = "Past Date Can't be Selected"
+      this.setState({ errorFromAPI: validationErr })
+      return;
+    }
+    if (this.state.closingDay === 'Tuesday') {
+      validationErr.message = "Resturant Will Close"
+      this.setState({ errorFromAPI: validationErr })
+      return;
+    }
+
+    if (this.state.reservation_time_val) {
+      validationErr.message = "Invalid Time"
+      this.setState({ errorFromAPI: validationErr })
+      return;
+    }
+
     let reser_Model = { ...this.state.reservationModel };
+    let day = this.showDayByDate(reser_Model.reservation_date)
+    let futureDate = this.futureDateCheck(reser_Model.reservation_date)
+    console.log(Validation_Res, day, futureDate);
     reser_Model.people = parseInt(reser_Model.people, 10)              // convert people from str to number 
     let data = { data: {} };
     data.data = reser_Model
     if (Validation_Res) {
 
-
+      const abortController = new AbortController()
       if (reser_Model.reservation_id) {                       // for update
         // /:reservation_id/status
 
         axios
-          .put(this.Reservation_status + "/" + reser_Model.reservation_id + '/status', data)
+          .put(this.Reservation_status + "/" + reser_Model.reservation_id + '/status', data,abortController.signal)
           .then((res) => {
             Swal.fire('Updated!', '', 'success').then(() => {
               this.setState(
@@ -152,21 +174,27 @@ class Reservation extends Component {
           .catch((err) => {
             this.setState({ errorFromAPI: err })
           })
+          return () => abortController.abort()
       } else {                                                    // to create new reservation
         axios
-          .post(this.Reservation_status, data)
+          .post(this.Reservation_status, data,abortController.signal)
           .then((res) => {
+            this.props.history.push(
+              `/dashboard`,
+              { from: '/reservations/new' },
+              { date: this.state.reservationModel.reservation_date },
+            )
             this.setState(
               {
                 reservationModel: res.data,
               },
-              () => {
-                this.props.history.push(
-                  `/dashboard`,
-                  { from: '/reservations/new' },
-                  { date: this.state.reservationModel.reservation_date },
-                )
-              },
+              // () => {
+              //   this.props.history.push(
+              //     `/dashboard`,
+              //     { from: '/reservations/new' },
+              //     { date: this.state.reservationModel.reservation_date },
+              //   )
+              // },
             )
           })
           .catch((error) => {
@@ -174,35 +202,26 @@ class Reservation extends Component {
               errorFromAPI: error,
             })
           })
+          return () => abortController.abort()
       }
 
     } else {
-      return
+      const err = {};
+      err.message = "invalid time"
+      this.setState({ errorFromAPI: err })
     }
   }
+
+  handleRoutes = () => {
+    // history.push(`/reservations/new`, { from: '/dashboard' })
+    this.props.history.goBack()
+  }
+
   render() {
     const {
       reservationModel,
-      closingDay,
-      futureDateVal,
-      reservation_time_val,
       errorFromAPI,
     } = this.state
-    let messageFuture = {},
-      messageDay = {},
-      messageForTimeOP = {}
-    if (futureDateVal === false) {
-      messageDay.message = "Past Date Can't be Selected"
-    }
-    if (closingDay === 'Tuesday') {
-      messageFuture.message = 'Resturant Will Close'
-    }
-
-    if (reservation_time_val) {
-      messageForTimeOP.message = 'Invalid Time'
-    }
-
-    // formate Date 
     return (
       <>
         <h4 className="text-center">Reservation Form</h4>
@@ -291,11 +310,18 @@ class Reservation extends Component {
           <button type="submit" className="btn btn-primary">
             Submit
           </button>
+          <button
+            type="button"
+            className="btn btn-secondary float-right"
+            onClick={this.handleRoutes}
+          >
+            cancel
+        </button>
         </form>
-        {messageDay.message ? <ErrorAlert error={messageDay} /> : null}
-        {messageFuture.message ? <ErrorAlert error={messageFuture} /> : null}
-        {messageForTimeOP.message ? (
-          <ErrorAlert error={messageForTimeOP} />
+        {this.state.messageDay ? <ErrorAlert error={this.state.messageDay} /> : null}
+        {this.state.messageFuture ? <ErrorAlert error={this.state.messageFuture} /> : null}
+        {this.state.messageForTimeOP ? (
+          <ErrorAlert error={this.state.messageForTimeOP} />
         ) : null}
         {errorFromAPI ? <ErrorAlert error={errorFromAPI} /> : null}
       </>

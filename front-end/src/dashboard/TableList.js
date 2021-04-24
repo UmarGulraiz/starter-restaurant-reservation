@@ -14,9 +14,11 @@ class TableList extends Component {
     this.state = { DataForTable: [], errorFromAPI: '' }
   }
 
-  UNSAFE_componentWillMount() {
+  componentWillMount() {
+    const abortController = new AbortController()
+
     axios
-      .get(this.Table_List)
+      .get(this.Table_List,abortController.signal)
       .then((res) => {
         this.setState({
           DataForTable: res.data.data,
@@ -25,6 +27,7 @@ class TableList extends Component {
       .catch((err) => {
         this.setState({ errorFromAPI: err })
       })
+      return () => abortController.abort()
   }
 
   handleFinishReq = (data) => {
@@ -32,14 +35,15 @@ class TableList extends Component {
       title: '"Is this table ready to seat new guests? This cannot be undone.',
       confirmButtonText: `OK`,
       denyButtonText: `Cancel`,
+      showDenyButton: true,
     }).then((result) => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
         axios
-          .delete(this.Table_List +"/"+ data.table_id + '/seat')
+          .delete(this.Table_List + "/" + data.table_id + '/seat')
           .then((res) => {
-            Swal.fire('Deleted!', '', 'success').then(()=>{
-              this.UNSAFE_componentWillMount()
+            Swal.fire('Deleted!', '', 'success').then(() => {
+              this.componentWillMount()
             })
           })
           .catch((err) => {
@@ -55,7 +59,7 @@ class TableList extends Component {
     this.props.history.goBack()
   }
   render() {
-    const { errorFromAPI,DataForTable } = this.state
+    const { errorFromAPI, DataForTable } = this.state
 
     return (
       <>
@@ -80,15 +84,20 @@ class TableList extends Component {
                   <td>{table.capacity}</td>
                   <td>
                     <div id={table.table_id} data-table-id-status={'1'}>
-                      {(table.reservation_id !== null) ? "Occupied" : "Free"}
+                      {
+                        (table.reservation_id !== null) ?
+                          <span data-table-id-status={table.table_id}>Occupied</span> :
+                          <span data-table-id-status={table.table_id}>Free</span>
+                      }
                     </div>
                   </td>
                   <td>
-                    {(table.reservation_id !== null)? (
+                    {(table.reservation_id !== null) ? (
                       <button
                         type="submit"
                         className="btn btn-primary"
                         onClick={() => this.handleFinishReq(table)}
+                        data-table-id-finish={table.table_id}
                       >
                         Finish
                       </button>

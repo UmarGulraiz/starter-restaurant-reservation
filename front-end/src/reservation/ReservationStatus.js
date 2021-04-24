@@ -5,15 +5,16 @@ import ErrorAlert from '../layout/ErrorAlert'
 class ReservationStatus extends Component {
     constructor(props) {
         super(props)
-
         this.Reservation_status =
             process.env.REACT_APP_API_BASE_URL + '/reservations'
         this.state = { DataForReservation: [], errorFromAPI: '' }
     }
-    componentDidMount() {
+
+    async componentDidMount() {
+        const abortController = new AbortController()
 
         axios
-            .get(this.Reservation_status)
+            .get(this.Reservation_status ,abortController.signal)
             .then((res) => {
                 this.setState({
                     DataForReservation: res.data.data,
@@ -22,30 +23,11 @@ class ReservationStatus extends Component {
             .catch((err) => {
                 this.setState({ errorFromAPI: err })
             })
+            return () => abortController.abort()
     }
 
     handleSeatBtn = (data) => {
-
         this.props.history.push('/reservations/:' + data.reservation_id + '/seat')
-
-        // let model = {
-        //   status: 'seated',
-        // }
-        // let data1 = { data: {} };
-        // data1.data = model
-        // axios
-        //   .put(
-        //     this.Reservation_status +"/"+data.reservation_id+"/status",
-        //     data1,
-        //   )
-        //   .then((res) => {
-        //     Swal.fire('Updated!', '', 'success').then(()=>{
-        //         this.componentDidMount()
-        //     })
-        //   })
-        //   .catch((err) => {
-        //     this.setState({ errorFromAPI: err })
-        //   })
     }
     render() {
         const { errorFromAPI, DataForReservation } = this.state
@@ -60,12 +42,11 @@ class ReservationStatus extends Component {
                         </tr>
                     </thead>
                     <tbody>
-                        {DataForReservation.map((reservation) => {
+                        {DataForReservation && DataForReservation.map((reservation) => {
                             return (
                                 <tr key={reservation.reservation_id}>
                                     <td>{reservation.reservation_id}</td>
                                     <td>{reservation.reservation_id}</td>
-
                                     <td>
                                         {reservation.status === 'booked' ? (
                                             <button
@@ -85,7 +66,6 @@ class ReservationStatus extends Component {
                         })}
                     </tbody>
                 </table>
-
                 {errorFromAPI ? <ErrorAlert error={errorFromAPI} /> : null}
             </>
         )

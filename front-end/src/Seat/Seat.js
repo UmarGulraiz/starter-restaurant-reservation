@@ -10,9 +10,10 @@ class Seat extends Component {
     this.state = { DataForTable: [], table_id: 0 }
   }
 
-  UNSAFE_componentWillMount() {
+  componentWillMount() {
+    const abortController = new AbortController()
     axios
-      .get(this.Table_List)
+      .get(this.Table_List,abortController.signal)
       .then((res) => {
         this.setState({
           DataForTable: res.data.data,
@@ -21,17 +22,26 @@ class Seat extends Component {
       .catch((err) => {
         this.setState({ errorFromAPI: err })
       })
+      return () => abortController.abort()
   }
 
   handleSubmit = () => {
+    if (this.state.table_id === 0) {
+      const error = {};
+      error.message = "select table"
+      this.setState({ errorFromAPI: error });
+      return;
+    }
+    const abortController = new AbortController()
     var res = this.props.match.params.reservation_id.split(':')
     let model = {
       reservation_id: res[1],
     }
     let data = { data: {} };
     data.data = model
+    
     axios
-      .put(this.Table_List + "/" + this.state.table_id + '/seat', data)
+      .put(this.Table_List + "/" + this.state.table_id + '/seat', data,abortController.signal)
       .then((res) => {
         this.props.history.push(`/dashboard`)
       })
@@ -41,6 +51,7 @@ class Seat extends Component {
         }
         this.setState({ errorFromAPI: error })
       });
+      return () => abortController.abort()
     return;
   }
   handleChange = (e) => {
