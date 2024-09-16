@@ -9,16 +9,16 @@ import "./Layout.css";
  *
  * You will not need to make changes to this file.
  *
- * @returns {JSX.Element}
+//  * @returns {JSX.Element}
  */
 function Layout() {
   return (
-    <div className="container-fluid">
+    <div style={{width:"fixed"}} >
       <div className="row h-100">
-        <div className="col-md-2 side-bar">
+        <div className="col-md-2">
           <Menu />
         </div>
-        <div className="col">
+        <div className="col-sm-8 col-md-9 col-xl-10  content">
           <Routes />
         </div>
       </div>

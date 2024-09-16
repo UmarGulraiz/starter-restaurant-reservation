@@ -9,7 +9,7 @@ describe("US-06 - Reservation status", () => {
       .forceFreeMigrationsLock()
       .then(() => knex.migrate.rollback(null, true))
       .then(() => knex.migrate.latest());
-  });
+  },30000);
 
   beforeEach(() => {
     return knex.seed.run();
